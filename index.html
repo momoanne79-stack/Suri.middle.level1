@@ -58,28 +58,22 @@
         .history-item { background: white; border: 2px solid #E2E8F0; border-radius: 15px; padding: 15px; margin-bottom: 12px; text-align: left; }
         .history-date { font-weight: 900; color: #2B6CB0; font-size: 18px; margin-bottom: 5px; border-bottom: 2px solid #EDF2F7; padding-bottom: 8px; }
 
-        /* 철자쓰기 테스트 디자인 */
-        .spell-meaning-box { font-size: 2.2rem; font-weight: 900; color: #2B6CB0; margin: 20px 0 10px 0; min-height: 60px; line-height: 1.3; word-break: break-word; }
-        .spell-hint { font-size: 14px; color: #718096; margin-bottom: 16px; font-weight: bold; }
-        .spell-input-wrap { display: flex; gap: 10px; justify-content: center; align-items: center; margin-bottom: 14px; }
-        .spell-input { flex: 1; max-width: 280px; padding: 14px 16px; font-size: 18px; font-weight: bold; border: 2px solid #CBD5E0; border-radius: 14px; outline: none; text-align: center; transition: 0.2s; letter-spacing: 2px; }
-        .spell-input:focus { border-color: #4299E1; box-shadow: 0 0 0 3px rgba(66,153,225,0.15); }
-        .spell-input.spell-ok { border-color: #48BB78; background: #F0FFF4; color: #276749; }
-        .spell-input.spell-fail { border-color: #E53E3E; background: #FFF5F5; animation: shake 0.4s; }
-        .spell-submit-btn { padding: 14px 18px; background: #2B6CB0; color: white; border: none; border-radius: 14px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .spell-submit-btn:active { transform: scale(0.95); background: #2C5282; }
-        .spell-feedback { font-size: 16px; font-weight: 900; min-height: 28px; margin-bottom: 8px; transition: 0.3s; }
-        .spell-answer-reveal { font-size: 15px; color: #718096; margin-bottom: 16px; min-height: 22px; }
-        .spell-nav { display: flex; gap: 10px; justify-content: center; margin-top: 8px; }
-        .spell-nav-btn { flex: 1; max-width: 140px; padding: 12px; border: none; border-radius: 12px; font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.2s; }
-        .spell-prev-btn { background: #EDF2F7; color: #4A5568; }
-        .spell-next-btn { background: #2B6CB0; color: white; }
-        .spell-nav-btn:active { transform: scale(0.95); }
-        .spell-score-bar { display: flex; justify-content: center; gap: 20px; background: #EBF8FF; border-radius: 12px; padding: 10px 15px; margin-bottom: 16px; font-size: 14px; font-weight: bold; color: #2C5282; border: 1px solid #BEE3F8; }
-        .spell-score-bar span { color: #2B6CB0; font-size: 16px; }
-        .spell-word-counter { font-size: 13px; color: #A0AEC0; font-weight: bold; margin-bottom: 6px; }
-        .spell-hint-btn { background: none; border: 1px dashed #CBD5E0; border-radius: 8px; padding: 5px 12px; font-size: 13px; color: #718096; cursor: pointer; margin-bottom: 10px; transition: 0.2s; }
-        .spell-hint-btn:hover { background: #EDF2F7; }
+
+        /* 🖨️ 한글 발음 테스트지 출력 */
+        .setup-box { flex-wrap: wrap; }
+        .print-pronunciation-btn {
+            padding: 10px 18px;
+            background: #2B6CB0 !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 10px !important;
+            cursor: pointer !important;
+            font-weight: 900 !important;
+            transition: 0.2s;
+            box-shadow: 0 4px 10px rgba(43, 108, 176, 0.25);
+        }
+        .print-pronunciation-btn:active { transform: scale(0.95); }
+
     </style>
 </head>
 <body>
@@ -93,8 +87,7 @@
     <div class="nav-container">
         <button class="menu-btn active" onclick="changeTab('list-tab', this)">1. 단어장</button>
         <button class="menu-btn" onclick="changeTab('test-tab', this)">2. 테스트</button>
-        <button class="menu-btn" onclick="changeTab('spell-tab', this)">3. 철자</button>
-        <button class="menu-btn" onclick="changeTab('history-tab', this); showHistory();">4. 기록</button>
+        <button class="menu-btn" onclick="changeTab('history-tab', this); showHistory();">3. 기록</button>
     </div>
 
     <div id="list-tab" class="section active">
@@ -102,6 +95,7 @@
             <strong>시작 번호:</strong>
             <input type="number" id="listStart" value="1" min="1" max="800">
             <button class="go-btn" onclick="loadList()">30개 보기 🚀</button>
+            <button class="print-pronunciation-btn" onclick="printPronunciationSheet()">한글 발음 테스트지 출력 🖨️</button>
         </div>
         <p style="font-size: 13px; color: #718096; margin-bottom: 15px; font-weight: bold;">번호부터 아래로 30개 단어를 보여줍니다.</p>
         <div id="list-content"></div>
@@ -117,34 +111,6 @@
         <div id="test-word" class="test-q-box">Word</div>
         <button onclick="speakTestWord()" style="background:none; border:none; cursor:pointer; font-size:24px; margin-bottom:20px;">🔊 다시 듣기</button>
         <div id="test-options" class="option-list"></div>
-    </div>
-
-    <div id="spell-tab" class="section">
-        <div class="setup-box">
-            <strong>시작 번호:</strong>
-            <input type="number" id="spellStart" value="1" min="1" max="800">
-            <button class="go-btn" onclick="loadSpellTest()">찾기 🔍</button>
-        </div>
-        <div class="spell-score-bar">
-            정답 <span id="spell-correct-count">0</span> &nbsp;|&nbsp; 오답 <span id="spell-wrong-count">0</span> &nbsp;|&nbsp; 남은 문제 <span id="spell-remain-count">30</span>
-        </div>
-        <div id="spell-progress" class="spell-word-counter">문제 1 / 30</div>
-        <div id="spell-meaning" class="spell-meaning-box">단어 뜻이 표시됩니다</div>
-        <div class="spell-hint" id="spell-char-hint"></div>
-        <button class="spell-hint-btn" onclick="showSpellHint()">💡 힌트 (첫 글자)</button>
-        <div class="spell-input-wrap">
-            <input type="text" class="spell-input" id="spell-input" placeholder="영어 철자를 입력하세요" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" onkeydown="if(event.key==='Enter') checkSpell()">
-            <button class="spell-submit-btn" onclick="checkSpell()">확인 ✓</button>
-        </div>
-        <div id="spell-feedback" class="spell-feedback"></div>
-        <div id="spell-answer-reveal" class="spell-answer-reveal"></div>
-        <div style="margin-bottom:10px;">
-            <button onclick="speakSpellWord()" style="background:none; border:none; cursor:pointer; font-size:22px;">🔊 발음 듣기</button>
-        </div>
-        <div class="spell-nav">
-            <button class="spell-nav-btn spell-prev-btn" onclick="moveSpell(-1)">◀ 이전</button>
-            <button class="spell-nav-btn spell-next-btn" onclick="moveSpell(1)">다음 ▶</button>
-        </div>
     </div>
 
     <div id="history-tab" class="section">
@@ -331,6 +297,911 @@
         };
     });
 
+
+
+    // 선택한 30개 단어 한글 발음 테스트지 출력
+    const koPronMap = {
+        "name": "네임",
+        "boy": "보이",
+        "girl": "걸",
+        "baby": "베이비",
+        "man": "맨",
+        "woman": "우먼",
+        "age": "에이지",
+        "dear": "디어",
+        "child": "차일드",
+        "teenager": "틴에이저",
+        "adult": "어덜트",
+        "someone": "썸원",
+        "everyone": "에브리원",
+        "lady": "레이디",
+        "gentleman": "젠틀맨",
+        "person": "퍼슨",
+        "people": "피플",
+        "own": "오운",
+        "each other": "이치 아더",
+        "be[come] from": "비컴 프롬",
+        "family": "패밀리",
+        "father": "파더",
+        "mother": "마더",
+        "son": "선",
+        "daughter": "도터",
+        "brother": "브라더",
+        "sister": "시스터",
+        "marry": "메리",
+        "husband": "허즈번드",
+        "wife": "와이프",
+        "parent(-s)": "패런트",
+        "uncle": "엉클",
+        "aunt": "앤트",
+        "grandparent(-s)": "그랜드패런트",
+        "cousin": "커즌",
+        "member": "멤버",
+        "pet": "펫",
+        "relative": "렐러티브",
+        "be born": "비 본",
+        "take care of": "테이크 케어 어브",
+        "friend": "프렌드",
+        "together": "투게더",
+        "club": "클럽",
+        "join": "조인",
+        "fight": "파이트",
+        "group": "그룹",
+        "classmate": "클래스메이트",
+        "partner": "파어트너",
+        "alone": "얼론",
+        "friendship": "프렌드십",
+        "share": "쉐어",
+        "neighbor": "네이버",
+        "favor": "페이버",
+        "introduce": "인트로듀스",
+        "harmony": "하모니",
+        "nickname": "닉네임",
+        "welcome": "웰컴",
+        "strange": "스트레인지",
+        "hang out (with)": "행 아웃 위드",
+        "make fun of": "메이크 펀 오브",
+        "body": "바디",
+        "ear": "이어",
+        "eye": "아이",
+        "nose": "노즈",
+        "mouth": "마우스",
+        "skin": "스킨",
+        "tooth": "투스",
+        "tongue": "텅",
+        "head": "헤드",
+        "hair": "헤어",
+        "arm": "암",
+        "shoulder": "숄더",
+        "hand": "핸드",
+        "finger": "핑거",
+        "leg": "레그",
+        "knee": "니",
+        "foot": "풋",
+        "toe": "토",
+        "grow up": "그로우 업",
+        "watch out": "워치 아웃",
+        "old": "올드",
+        "young": "영",
+        "short": "쇼트",
+        "tall": "톨",
+        "long": "롱",
+        "pretty": "프리티",
+        "ugly": "어글리",
+        "handsome": "핸섬",
+        "face": "페이스",
+        "thin": "씬",
+        "fat": "팻",
+        "curly": "커리",
+        "blond": "블론드",
+        "change": "체인지",
+        "lovely": "러블리",
+        "cute": "큐트",
+        "normal": "노멀",
+        "beautiful": "뷰티풀",
+        "look like": "룩 라이크",
+        "show up": "쇼 업",
+        "kind": "카인드",
+        "funny": "퍼니",
+        "quiet": "콰이어트",
+        "careful": "케어풀",
+        "shy": "샤이",
+        "stupid": "스튜피드",
+        "lazy": "레이지",
+        "calm": "캄",
+        "smart": "스마트",
+        "clever": "클레버",
+        "wise": "와이즈",
+        "honest": "어니스트",
+        "polite": "폴라이트",
+        "friendly": "프렌들리",
+        "active": "액티브",
+        "brave": "브레이브",
+        "curious": "크우어이어스",
+        "character": "케어익터",
+        "on time": "온 타임",
+        "on one's own": "온 원즈 오운",
+        "job": "잡",
+        "firefighter": "파이어파이터",
+        "librarian": "라이브러리언",
+        "pilot": "파일럿",
+        "want": "원트",
+        "police officer": "폴리스 오피서",
+        "scientist": "사이언티스트",
+        "worker": "워커",
+        "become": "비컴",
+        "reporter": "리포터",
+        "farmer": "파머",
+        "writer": "라이터",
+        "engineer": "엔저니어",
+        "work": "워크",
+        "company": "컴퍼니",
+        "director": "디렉터",
+        "future": "퓨처",
+        "experience": "익스피리언스",
+        "be interested in": "비 인터레스티드 인",
+        "come true": "컴 트루",
+        "play": "플레이",
+        "walk": "워크",
+        "run": "런",
+        "kick": "킥",
+        "jump": "점프",
+        "throw": "쓰로우",
+        "use": "유즈",
+        "close": "클로즈",
+        "cry": "크라이",
+        "act": "액트",
+        "move": "무브",
+        "shout": "샤우트",
+        "carry": "캐리",
+        "drop": "드롭",
+        "try": "트라이",
+        "check": "체크",
+        "bring": "브링",
+        "laugh": "래프",
+        "have[take] a seat": "해브 테이크 어 시트",
+        "get out of": "겟 아웃 오브",
+        "sad": "새드",
+        "happy": "해피",
+        "afraid": "어프레이드",
+        "angry": "앵그리",
+        "glad": "글래드",
+        "lonely": "론리",
+        "serious": "시어이어스",
+        "nervous": "너버스",
+        "scared": "스케어드",
+        "upset": "업셋",
+        "surprised": "서프라이즈드",
+        "bored": "보어드",
+        "pleased": "플리즈드",
+        "excited": "익사이티드",
+        "worry": "워리",
+        "miss": "미스",
+        "excuse": "익스큐즈",
+        "complain": "컴플레인",
+        "be proud of": "비 프라우드 오브",
+        "would like to-v": "우드 라이크 투",
+        "idea": "아이디어",
+        "dream": "드림",
+        "believe": "빌리브",
+        "think": "띵크",
+        "know": "노우",
+        "need": "니드",
+        "hope": "호프",
+        "wish": "위시",
+        "decide": "디사이드",
+        "guess": "게스",
+        "forget": "포겟",
+        "remember": "리멤버",
+        "wonder": "원더",
+        "keep": "킵",
+        "understand": "언더스탠드",
+        "plan": "플랜",
+        "mind": "마인드",
+        "question": "퀘스천",
+        "feel like -ing": "필 라이크",
+        "give up": "기브 업",
+        "talk": "토크",
+        "speak": "스피크",
+        "call": "콜",
+        "tell": "텔",
+        "say": "세이",
+        "ask": "애스크",
+        "answer": "앤서",
+        "show": "쇼",
+        "express": "익스프레스",
+        "message": "메시지",
+        "mean": "민",
+        "discuss": "디스커스",
+        "explain": "익스플레인",
+        "problem": "프라블럼",
+        "agree": "어그리",
+        "allow": "얼라우",
+        "accept": "억셉트",
+        "promise": "프라미스",
+        "find out": "파인드 아웃",
+        "say hello to": "세이 헬로 투",
+        "hear": "히어",
+        "listen": "리슨",
+        "see": "씨",
+        "watch": "워치",
+        "look": "룩",
+        "voice": "보이스",
+        "feel": "필",
+        "smell": "스멜",
+        "sound": "사운드",
+        "taste": "테이스트",
+        "loud": "라우드",
+        "touch": "터치",
+        "soft": "소프트",
+        "hard": "하드",
+        "sweet": "스위트",
+        "sharp": "샤프",
+        "same": "세임",
+        "color": "컬러",
+        "be good at": "비 굿 앳",
+        "make a noise": "메이크 어 노이즈",
+        "visit": "비지트",
+        "zoo": "주",
+        "bank": "뱅크",
+        "park": "파크",
+        "airport": "에어포트",
+        "place": "플레이스",
+        "town": "타운",
+        "village": "빌리지",
+        "city": "시티",
+        "bookstore": "북스토어",
+        "market": "마켓",
+        "square": "스퀘어",
+        "theater": "시어터",
+        "bakery": "베이커리",
+        "space": "스페이스",
+        "station": "스테이션",
+        "museum": "뮤지엄",
+        "gallery": "갤러리",
+        "line up": "라인 업",
+        "stop by": "스톱 바이",
+        "wall": "월",
+        "garden": "가든",
+        "bathroom": "바스룸",
+        "stair": "스테어",
+        "wash": "워시",
+        "gate": "게이트",
+        "umbrella": "엄브렐라",
+        "roof": "루프",
+        "kitchen": "키친",
+        "refrigerator": "러프리저에이터",
+        "floor": "플로어",
+        "living room": "리빙 룸",
+        "bedroom": "베드룸",
+        "address": "어드레스",
+        "stay": "스테이",
+        "garbage": "가비지",
+        "housework": "하우스워크",
+        "comfortable": "컴퍼터블",
+        "turn off": "턴 오프",
+        "go to bed": "고 투 베드",
+        "salt": "솔트",
+        "sugar": "슈가",
+        "meat": "미트",
+        "snack": "스낵",
+        "fresh": "프레쉬",
+        "sauce": "소스",
+        "rice": "라이스",
+        "bottle": "보틀",
+        "heat": "히트",
+        "bake": "베이크",
+        "meal": "밀",
+        "cook": "쿡",
+        "mix": "믹스",
+        "pour": "포어",
+        "melt": "멜트",
+        "delicious": "딜리셔스",
+        "freeze": "프리즈",
+        "recipe": "레서피",
+        "such as": "서치 애즈",
+        "do the dishes": "두 더 디시즈",
+        "eat": "잇",
+        "drink": "드링크",
+        "knife": "나이프",
+        "cup": "컵",
+        "dish": "디쉬",
+        "juice": "주스",
+        "soup": "수프",
+        "salad": "샐러드",
+        "seafood": "씨푸드",
+        "menu": "메뉴",
+        "hungry": "헝그리",
+        "thirsty": "써스티",
+        "open": "오픈",
+        "order": "오더",
+        "chef": "셰프",
+        "serve": "서브",
+        "dessert": "디저트",
+        "restaurant": "레스토랑",
+        "eat out": "잇 아웃",
+        "wait for": "웨이트 포",
+        "pants": "팬츠",
+        "belt": "벨트",
+        "shirt": "셔츠",
+        "skirt": "스커트",
+        "socks": "삭스",
+        "shoes": "슈즈",
+        "hat": "햇",
+        "cap": "캡",
+        "sweater": "스웨터",
+        "jacket": "재컷",
+        "gloves": "글러브즈",
+        "pocket": "포켓",
+        "clothes": "클로즈",
+        "wear": "웨어",
+        "fashion": "패션",
+        "design": "디자인",
+        "popular": "파퓰러",
+        "style": "스타일",
+        "put on": "풋 온",
+        "take off": "테이크 오프",
+        "subway": "서브웨이",
+        "bike": "바이크",
+        "airplane": "에어플레인",
+        "truck": "트럭",
+        "boat": "보트",
+        "ride": "라이드",
+        "street": "스트리트",
+        "road": "로드",
+        "drive": "드라이브",
+        "right": "라이트",
+        "left": "레프트",
+        "block": "블락",
+        "straight": "스트레이트",
+        "bridge": "브릿지",
+        "across": "어크로스",
+        "sign": "사인",
+        "corner": "코너",
+        "stop": "스톱",
+        "get on": "겟 온",
+        "hurry up": "허리 업",
+        "teacher": "티처",
+        "student": "스튜던트",
+        "test": "테스트",
+        "library": "라이브러리",
+        "playground": "플레이그라운드",
+        "gym": "짐",
+        "contest": "콘테스트",
+        "follow": "팔로우",
+        "school uniform": "스쿨 유니폼",
+        "hall": "홀",
+        "cafeteria": "캐퍼티어이어",
+        "locker": "라커",
+        "homeroom": "홈룸",
+        "grade": "그레이드",
+        "teach": "티치",
+        "learn": "런",
+        "subject": "서브젝트",
+        "borrow": "바로우",
+        "make friends (with)": "메이크 프렌즈 위드",
+        "after school": "애프터 스쿨",
+        "homework": "홈워크",
+        "lesson": "레슨",
+        "study": "스터디",
+        "difficult": "디피컬트",
+        "classroom": "클래스룸",
+        "review": "리뷰",
+        "write": "라이트",
+        "solve": "솔브",
+        "correct": "커렉트",
+        "wrong": "롱",
+        "diary": "다이어리",
+        "report": "리포트",
+        "fail": "페일",
+        "note(-s)": "노트",
+        "speech": "스피치",
+        "finish": "피니시",
+        "mistake": "미스테이크",
+        "absent": "앱선트",
+        "take a break": "테이크 어 브레이크",
+        "get up": "겟 업",
+        "date": "데이트",
+        "week": "위크",
+        "from": "프롬",
+        "month": "먼스",
+        "year": "이어",
+        "early": "얼리",
+        "today": "투데이",
+        "yesterday": "예스터데이",
+        "tomorrow": "투모로우",
+        "past": "패스트",
+        "tonight": "투나잇",
+        "hour": "아워",
+        "minute": "미닛",
+        "soon": "순",
+        "calendar": "캘린더",
+        "during": "듀어링",
+        "until": "언틸",
+        "moment": "모먼트",
+        "be late for": "비 레이트 포",
+        "at the same time": "앳 더 세임 타임",
+        "first": "퍼스트",
+        "second": "세컨드",
+        "third": "써드",
+        "again": "어게인",
+        "before": "비포",
+        "after": "애프터",
+        "never": "네버",
+        "sometimes": "썸타임즈",
+        "often": "오픈",
+        "usually": "유주얼리",
+        "always": "올웨이즈",
+        "once": "원스",
+        "final": "파이널",
+        "last": "래스트",
+        "next": "넥스트",
+        "step": "스텝",
+        "repeat": "리피트",
+        "suddenly": "서든리",
+        "all the time": "올 더 타임",
+        "from time to time": "프럼 타임 투 타임",
+        "clean": "클린",
+        "dirty": "더티",
+        "busy": "비지",
+        "poor": "푸어",
+        "slow": "슬로우",
+        "fast": "패스트",
+        "quickly": "퀵클리",
+        "sleepy": "슬리피",
+        "heavy": "헤비",
+        "light": "라이트",
+        "safe": "세이프",
+        "wet": "웻",
+        "ready": "레디",
+        "dark": "다크",
+        "bright": "브라이트",
+        "perfect": "퍼펙트",
+        "different": "디퍼런트",
+        "terrible": "테러블",
+        "be full of": "비 풀 오브",
+        "for a while": "포 어 와일",
+        "huge": "휴즈",
+        "small": "스몰",
+        "narrow": "내로우",
+        "wide": "와이드",
+        "round": "라운드",
+        "part": "파트",
+        "line": "라인",
+        "side": "사이드",
+        "shape": "쉐이프",
+        "size": "사이즈",
+        "type": "타입",
+        "large": "라지",
+        "high": "하이",
+        "low": "로우",
+        "deep": "딥",
+        "thick": "띠크",
+        "flat": "플랫",
+        "object": "아브젝트",
+        "for example": "포 이그잼플",
+        "a kind of": "어 카인드 오브",
+        "number": "넘버",
+        "some": "썸",
+        "each": "이치",
+        "every": "에브리",
+        "all": "올",
+        "only": "온리",
+        "many": "매니",
+        "much": "머치",
+        "half": "하프",
+        "add": "애드",
+        "empty": "엠프티",
+        "fill": "필",
+        "count": "카운트",
+        "enough": "이너프",
+        "total": "토털",
+        "piece": "피스",
+        "nothing": "낫띵",
+        "a lot of": "어 랏 오브",
+        "a few": "어 퓨",
+        "a little": "어 리틀",
+        "south": "사우스",
+        "east": "이스트",
+        "west": "웨스트",
+        "north": "노스",
+        "under": "언더",
+        "below": "빌로우",
+        "behind": "비하인드",
+        "between": "비트윈",
+        "center": "센터",
+        "around": "어라운드",
+        "toward": "토워드",
+        "above": "어보브",
+        "over": "오버",
+        "far": "파",
+        "inside": "인사이드",
+        "outside": "아웃사이드",
+        "top": "탑",
+        "bottom": "바텀",
+        "next to": "넥스트 투",
+        "in front of": "인 프론트 오브",
+        "map": "맵",
+        "vacation": "베케이션",
+        "beach": "비치",
+        "trip": "트립",
+        "tour": "투어",
+        "travel": "트래블",
+        "backpack": "백팩",
+        "climb": "클라임",
+        "leave": "리브",
+        "arrive": "어라이브",
+        "return": "리턴",
+        "guide": "가이드",
+        "tourist": "투어리스트",
+        "view": "뷰",
+        "memory": "메모리",
+        "exciting": "익사이팅",
+        "adventure": "어드벤처",
+        "pack": "팩",
+        "get to": "겟 투",
+        "take a walk": "테이크 어 워크",
+        "sport": "스포츠",
+        "race": "레이스",
+        "baseball": "베이스볼",
+        "basketball": "바스켓볼",
+        "soccer": "사커",
+        "catch": "캐치",
+        "win": "윈",
+        "lose": "루즈",
+        "stadium": "스테이디엄",
+        "cheer": "치어",
+        "practice": "프랙티스",
+        "rule": "룰",
+        "player": "플레이어",
+        "teamwork": "팀워크",
+        "match": "매치",
+        "hold": "홀드",
+        "score": "스코어",
+        "possible": "파서블",
+        "work out": "워크 아웃",
+        "do one's best": "두 원즈 베스트",
+        "gift": "기프트",
+        "weekend": "위크엔드",
+        "birthday": "버스데이",
+        "photo": "포토",
+        "special": "스페셜",
+        "prize": "프라이즈",
+        "festival": "페스티벌",
+        "firework": "파이어워크",
+        "wonderful": "원더풀",
+        "holiday": "홀리데이",
+        "fair": "페어",
+        "party": "파티",
+        "guest": "게스트",
+        "invite": "인바이트",
+        "meeting": "미팅",
+        "present": "프레젠트",
+        "volunteer": "볼런티어",
+        "interview": "인터뷰",
+        "be going to-v": "비 고잉 투",
+        "take place": "테이크 플레이스",
+        "swim": "스윔",
+        "read": "리드",
+        "draw": "드로우",
+        "hobby": "하비",
+        "dance": "댄스",
+        "free": "프리",
+        "collect": "콜렉트",
+        "paint": "페인트",
+        "game": "게임",
+        "favorite": "페이버릿",
+        "enjoy": "인조이",
+        "exercise": "엑서사이즈",
+        "activity": "액티비티",
+        "hiking": "하이킹",
+        "fishing": "피싱",
+        "camping": "캠핑",
+        "outdoor": "아우트도",
+        "interesting": "인터레스팅",
+        "have fun": "해브 펀",
+        "take a picture of": "테이크 어 픽처 오브",
+        "art": "아트",
+        "music": "뮤직",
+        "singer": "싱어",
+        "ticket": "티켓",
+        "film": "필름",
+        "story": "스토리",
+        "famous": "페이머스",
+        "band": "밴드",
+        "actor": "액터",
+        "actress": "액트리스",
+        "painting": "페인팅",
+        "stage": "스테이지",
+        "artist": "아티스트",
+        "magic": "매직",
+        "novel": "노블",
+        "concert": "콘서트",
+        "role": "롤",
+        "main": "메인",
+        "be over": "비 오버",
+        "go to the movies": "고 투 더 무비즈",
+        "buy": "바이",
+        "sell": "셀",
+        "spend": "스펜드",
+        "list": "리스트",
+        "item": "아이텀",
+        "sale": "세일",
+        "store": "스토어",
+        "mall": "몰",
+        "choose": "추즈",
+        "pay": "페이",
+        "coupon": "쿠폰",
+        "waste": "웨이스트",
+        "price": "프라이스",
+        "expensive": "익스펜시브",
+        "cheap": "칩",
+        "customer": "커스터머",
+        "discount": "디스카운트",
+        "useful": "유스풀",
+        "try on": "트라이 온",
+        "look around": "룩 어라운드",
+        "nurse": "너스",
+        "sick": "식",
+        "weak": "위크",
+        "strong": "스트롱",
+        "fever": "피버",
+        "cough": "커프",
+        "pain": "페인",
+        "hospital": "하스피탈",
+        "headache": "헤드에이크",
+        "medicine": "메더선",
+        "weight": "웨이트",
+        "tired": "타이어드",
+        "hurt": "허트",
+        "treat": "트리트",
+        "relax": "릴랙스",
+        "advice": "어드바이스",
+        "health": "헬스",
+        "stomach": "스토머크",
+        "see a doctor": "씨 어 닥터",
+        "catch a cold": "캐치 어 콜드",
+        "grass": "그래스",
+        "flower": "플라워",
+        "tree": "트리",
+        "leaf": "리프",
+        "stone": "스톤",
+        "wood": "우드",
+        "fruit": "프루트",
+        "branch": "브랜치",
+        "ground": "그라운드",
+        "soil": "소일",
+        "field": "필드",
+        "farm": "팜",
+        "water": "워터",
+        "dig": "디그",
+        "grow": "그로우",
+        "plant": "플랜트",
+        "bean": "빈",
+        "vegetable": "베지터블",
+        "right away": "라이트 어웨이",
+        "pick up": "픽 업",
+        "bee": "비",
+        "fly": "플라이",
+        "wolf": "울프",
+        "monkey": "몽키",
+        "elephant": "엘리펀트",
+        "zebra": "지브러",
+        "whale": "웨일",
+        "chicken": "치킨",
+        "snake": "스네이크",
+        "mouse": "마우스",
+        "sheep": "쉽",
+        "giraffe": "저애프",
+        "wild": "와일드",
+        "animal": "애니멀",
+        "hunt": "헌트",
+        "tail": "테일",
+        "colorful": "컬러풀",
+        "feed": "피드",
+        "by the way": "바이 더 웨이",
+        "look for": "룩 포",
+        "hill": "힐",
+        "land": "랜드",
+        "river": "리버",
+        "lake": "레이크",
+        "desert": "데저트",
+        "forest": "포레스트",
+        "valley": "배리",
+        "island": "아일랜드",
+        "jungle": "정글",
+        "mountain": "마운틴",
+        "pond": "폰드",
+        "ocean": "오션",
+        "cave": "케이브",
+        "polar": "포러",
+        "nature": "네이처",
+        "mystery": "미스터리",
+        "wave": "웨이브",
+        "discover": "디스커버",
+        "look at": "룩 앳",
+        "take turns": "테이크 턴즈",
+        "warm": "웜",
+        "cold": "콜드",
+        "cool": "쿨",
+        "hot": "핫",
+        "rain": "레인",
+        "snow": "스노우",
+        "clear": "클리어",
+        "sunny": "써니",
+        "windy": "윈디",
+        "cloudy": "클라우디",
+        "spring": "스프링",
+        "summer": "서머",
+        "fall": "폴",
+        "winter": "윈터",
+        "season": "시즌",
+        "blow": "블로우",
+        "weather": "웨더",
+        "forecast": "포캐스트",
+        "at first": "앳 퍼스트",
+        "all day (long)": "올 데이 롱",
+        "event": "이벤트",
+        "start": "스타트",
+        "end": "엔드",
+        "enter": "엔터",
+        "luck": "럭",
+        "important": "임포턴트",
+        "building": "빌딩",
+        "law": "로",
+        "history": "히스토리",
+        "hometown": "홈타운",
+        "local": "로컬",
+        "create": "크리에이트",
+        "project": "프로젝트",
+        "citizen": "시터전",
+        "president": "프레저덴트",
+        "information": "인포메이션",
+        "program": "프로그램",
+        "traditional": "트래디셔널",
+        "ask for": "애스크 포",
+        "these days": "디즈 데이즈",
+        "air": "에어",
+        "fire": "파이어",
+        "sand": "샌드",
+        "rock": "락",
+        "earth": "어스",
+        "power": "파우어",
+        "glass": "글래스",
+        "reuse": "리유즈",
+        "recycle": "리사이클",
+        "plastic": "플래스틱",
+        "trash": "트래쉬",
+        "save": "세이브",
+        "energy": "에너지",
+        "bill": "빌",
+        "protect": "프로텍트",
+        "dangerous": "데인저러스",
+        "float": "플로트",
+        "environment": "인바이어언먼트",
+        "throw away": "쓰로우 어웨이",
+        "be worried about": "비 워리드 어바웃",
+        "help": "헬프",
+        "human": "휴먼",
+        "country": "컨트리",
+        "peace": "피스",
+        "war": "워",
+        "website": "웹사이트",
+        "spread": "스프레드",
+        "chat": "챗",
+        "post": "포스트",
+        "online": "온라인",
+        "explore": "익스플로",
+        "palace": "팰리스",
+        "actually": "액추얼리",
+        "science": "사이언스",
+        "culture": "컬처",
+        "universe": "우너버스",
+        "language": "랭귀지",
+        "foreigner": "포리너",
+        "believe in": "빌리브 인",
+        "around the world": "어라운드 더 월드"
+};
+
+    function getKoreanPron(word) {
+        return koPronMap[word] || word;
+    }
+
+    function escapePrintHtml(text) {
+        return String(text).replace(/[&<>"']/g, ch => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[ch]));
+    }
+
+    function getListRangeWordsForPrint() {
+        const input = document.getElementById('listStart');
+        let startIdx = parseInt(input.value, 10) - 1;
+        if (isNaN(startIdx) || startIdx < 0) startIdx = 0;
+        if (startIdx >= wordList.length) startIdx = Math.max(0, wordList.length - 1);
+        input.value = startIdx + 1;
+        return wordList.slice(startIdx, Math.min(startIdx + 30, wordList.length));
+    }
+
+    function makePronunciationRows(words) {
+        let rows = '';
+        for (let i = 0; i < 30; i++) {
+            const pronunciation = words[i] ? getKoreanPron(words[i].en) : '';
+            rows += `
+                <div class="row">
+                    <span class="num">${i + 1}.</span>
+                    <span class="word">${escapePrintHtml(pronunciation)}</span>
+                </div>
+            `;
+        }
+        return rows;
+    }
+
+    function printPronunciationSheet() {
+        const words = getListRangeWordsForPrint();
+        if (!words.length) {
+            alert('출력할 단어가 없습니다. 시작 번호를 확인해주세요.');
+            return;
+        }
+
+        const start = words[0].num;
+        const end = words[words.length - 1].num;
+        const rowsHtml = makePronunciationRows(words);
+        const half = `
+            <section class="half">
+                <div class="sheet-title">한글 발음 테스트지</div>
+                <div class="range">선택 단어: ${start}번 ~ ${end}번</div>
+                <div class="name-line">이름: ____________________</div>
+                <div class="word-list">${rowsHtml}</div>
+            </section>
+        `;
+
+        const printHtml = `<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>한글 발음 테스트지 ${start}-${end}</title>
+<style>
+    @page { size: A4 portrait; margin: 8mm; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', Arial, sans-serif; color: #111; background: #fff; }
+    .page { width: 194mm; min-height: 281mm; display: grid; grid-template-columns: 1fr 1fr; gap: 7mm; }
+    .half { padding: 4mm 5mm; border: 1px solid #222; min-height: 281mm; }
+    .half + .half { position: relative; }
+    .half + .half::before { content: ''; position: absolute; left: -3.5mm; top: 0; bottom: 0; border-left: 1px dashed #999; }
+    .sheet-title { text-align: center; font-size: 14pt; font-weight: 900; margin-bottom: 1.5mm; }
+    .range { text-align: center; font-size: 10pt; font-weight: 700; margin-bottom: 2.5mm; }
+    .name-line { font-size: 10pt; margin-bottom: 3mm; }
+    .word-list { display: grid; grid-template-rows: repeat(30, 1fr); }
+    .row { display: flex; align-items: center; height: 7.15mm; border-bottom: 1px solid #ddd; font-size: 11.5pt; line-height: 1; }
+    .num { width: 10mm; font-weight: 700; color: #333; }
+    .word { flex: 1; font-weight: 900; letter-spacing: 0; }
+    @media print {
+        body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .page { page-break-after: avoid; }
+    }
+</style>
+</head>
+<body>
+    <main class="page">${half}${half}</main>
+    <script>
+        window.onload = function() {
+            setTimeout(function(){ window.focus(); window.print(); }, 250);
+        };
+    <\/script>
+</body>
+</html>`;
+
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) {
+            alert('팝업이 차단되었습니다. 팝업 허용 후 다시 눌러주세요.');
+            return;
+        }
+        printWindow.document.open();
+        printWindow.document.write(printHtml);
+        printWindow.document.close();
+    }
+
+
     let currentTestIdx = 0;
 
     // 탭 변경
@@ -458,143 +1329,10 @@
         });
     }
 
-    // ==========================================
-    // 4. 철자쓰기 테스트
-    // ==========================================
-    let spellWords = [];
-    let spellIdx = 0;
-    let spellCorrect = 0;
-    let spellWrong = 0;
-    let spellAnswered = []; // 각 문제 답변 여부: null | 'correct' | 'wrong'
-    let spellHintShown = false;
-
-    function loadSpellTest() {
-        const startNum = parseInt(document.getElementById('spellStart').value) || 1;
-        const startIdx = Math.max(0, startNum - 1);
-        const endIdx = Math.min(startIdx + 30, wordList.length);
-        spellWords = wordList.slice(startIdx, endIdx);
-        spellIdx = 0;
-        spellCorrect = 0;
-        spellWrong = 0;
-        spellAnswered = new Array(spellWords.length).fill(null);
-        updateSpellScoreBar();
-        renderSpellQuestion();
-    }
-
-    function renderSpellQuestion() {
-        if (spellWords.length === 0) return;
-        const w = spellWords[spellIdx];
-        document.getElementById('spell-progress').innerText = `문제 ${spellIdx + 1} / ${spellWords.length}`;
-        document.getElementById('spell-meaning').innerText = w.ko;
-        document.getElementById('spell-char-hint').innerText = `(${w.en.length}글자)`;
-        document.getElementById('spell-feedback').innerText = '';
-        document.getElementById('spell-feedback').style.color = '';
-        document.getElementById('spell-answer-reveal').innerText = '';
-        document.getElementById('spell-input').value = '';
-        document.getElementById('spell-input').className = 'spell-input';
-        document.getElementById('spell-input').disabled = false;
-        spellHintShown = false;
-
-        // 이미 답한 문제면 상태 복원
-        const answered = spellAnswered[spellIdx];
-        if (answered === 'correct') {
-            document.getElementById('spell-feedback').innerText = '✅ 정답!';
-            document.getElementById('spell-feedback').style.color = '#276749';
-            document.getElementById('spell-input').value = w.en;
-            document.getElementById('spell-input').className = 'spell-input spell-ok';
-            document.getElementById('spell-input').disabled = true;
-        } else if (answered === 'wrong') {
-            document.getElementById('spell-feedback').innerText = '❌ 오답';
-            document.getElementById('spell-feedback').style.color = '#C53030';
-            document.getElementById('spell-answer-reveal').innerText = `정답: ${w.en}`;
-            document.getElementById('spell-input').className = 'spell-input spell-fail';
-            document.getElementById('spell-input').disabled = true;
-        }
-        document.getElementById('spell-input').focus();
-    }
-
-    function checkSpell() {
-        if (spellWords.length === 0) return;
-        const w = spellWords[spellIdx];
-        if (spellAnswered[spellIdx] !== null) {
-            // 이미 답한 경우 다음으로
-            if (spellIdx < spellWords.length - 1) { spellIdx++; renderSpellQuestion(); }
-            return;
-        }
-        const userInput = document.getElementById('spell-input').value.trim().toLowerCase();
-        const correct = w.en.toLowerCase().replace(/[()[\]]/g, '').split('/')[0].trim();
-        // 대괄호 안 내용 제거 후 비교 (예: be[come] from → be from)
-        const cleanCorrect = w.en.toLowerCase().replace(/\[.*?\]/g, '').replace(/\(.*?\)/g, '').trim();
-        const isCorrect = userInput === correct || userInput === cleanCorrect || userInput === w.en.toLowerCase();
-
-        if (isCorrect) {
-            document.getElementById('spell-feedback').innerText = '✅ 정답!';
-            document.getElementById('spell-feedback').style.color = '#276749';
-            document.getElementById('spell-input').className = 'spell-input spell-ok';
-            document.getElementById('spell-input').disabled = true;
-            spellAnswered[spellIdx] = 'correct';
-            spellCorrect++;
-            saveSpellScore();
-        } else {
-            document.getElementById('spell-feedback').innerText = '❌ 오답!';
-            document.getElementById('spell-feedback').style.color = '#C53030';
-            document.getElementById('spell-input').className = 'spell-input spell-fail';
-            document.getElementById('spell-answer-reveal').innerText = `정답: ${w.en}`;
-            document.getElementById('spell-input').disabled = true;
-            spellAnswered[spellIdx] = 'wrong';
-            spellWrong++;
-            speakText(w.en);
-        }
-        updateSpellScoreBar();
-        // 자동으로 1초 후 다음 문제 (마지막 아닐 때)
-        if (spellIdx < spellWords.length - 1) {
-            setTimeout(() => { spellIdx++; renderSpellQuestion(); }, 1200);
-        } else {
-            setTimeout(() => {
-                const total = spellWords.length;
-                alert(`🎉 철자쓰기 완료!\n정답: ${spellCorrect} / ${total}\n오답: ${spellWrong} / ${total}`);
-            }, 1200);
-        }
-    }
-
-    function moveSpell(dir) {
-        spellIdx = Math.max(0, Math.min(spellWords.length - 1, spellIdx + dir));
-        renderSpellQuestion();
-    }
-
-    function showSpellHint() {
-        if (spellWords.length === 0) return;
-        if (spellAnswered[spellIdx] !== null) return;
-        const w = spellWords[spellIdx];
-        if (!spellHintShown) {
-            document.getElementById('spell-char-hint').innerText = `첫 글자: "${w.en[0]}" (${w.en.length}글자)`;
-            spellHintShown = true;
-        }
-    }
-
-    function speakSpellWord() {
-        if (spellWords.length > 0) speakText(spellWords[spellIdx].en);
-    }
-
-    function updateSpellScoreBar() {
-        const remain = spellWords.length - spellAnswered.filter(a => a !== null).length;
-        document.getElementById('spell-correct-count').innerText = spellCorrect;
-        document.getElementById('spell-wrong-count').innerText = spellWrong;
-        document.getElementById('spell-remain-count').innerText = remain;
-    }
-
-    function saveSpellScore() {
-        const date = new Date().toLocaleDateString();
-        let scores = JSON.parse(localStorage.getItem('mid-basic-lv1-history')) || {};
-        scores[date] = (scores[date] || 0) + 1;
-        localStorage.setItem('mid-basic-lv1-history', JSON.stringify(scores));
-    }
-
     // 초기 실행
     window.onload = () => {
         loadList();
         loadTest();
-        loadSpellTest();
     };
 </script>
 </body>
